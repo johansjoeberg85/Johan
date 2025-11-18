@@ -1,9 +1,11 @@
+<!-- Chosen Palette: Dark Mode / Deep Purple Accent (Baserat på Tailwind CSS: Gray-800/700/600 för bakgrund, Purple-500/600 för accent.) -->
+<!-- Application Structure Plan: Applikationen är ett interaktivt quiz i ett enda fönster, designat för att vara pedagogiskt och engagerande. Huvudstrukturen är en "Karta" (Main Screen) där användaren väljer bland fyra tematiska nivåer. Efter att ha valt nivå, byter appen till ett "Spelområde" (Game Area) med frågor, feedback och en progressiv visning av samlade "stödord" (key takeaways). Denna interaktiva struktur valdes för att maximera inlärning och förståelse. -->
 <!DOCTYPE html>
 <html lang="sv">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rättsprocessen: Jakten på Rättvisan</title>
+    <title>Rättsprocessen Quiz: Jakten på Rättvisan</title>
     <!-- Ladda Tailwind CSS för enkel och responsiv styling -->
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700;900&display=swap" rel="stylesheet">
@@ -36,10 +38,16 @@
             filter: grayscale(80%);
             opacity: 0.6;
             cursor: not-allowed;
-            pointer-events: none; /* Inaktivera klick när låst */
+            pointer-events: none; /* Inaktivera klick på låsta nivåer */
         }
         .unlocked {
             animation: pulse-border 1.5s infinite;
+        }
+        .cleared-level {
+            border-color: #10b981 !important; /* Grön kant för klarad nivå */
+            filter: none;
+            cursor: pointer;
+            animation: none;
         }
 
         /* CSS-animation för att indikera olåst nivå */
@@ -78,73 +86,78 @@
     <!-- Huvudskärm för spelet -->
     <div id="main-screen" class="space-y-6">
         <h1 class="text-4xl md:text-5xl font-extrabold text-white text-center mb-6 drop-shadow-lg">
-            Rättsprocessen: Jakten på Rättvisan
+            Rättsprocessen Quiz: Jakten på Rättvisan
         </h1>
         <p class="text-center text-lg md:text-xl text-gray-300 mb-8">
-            Välkommen! Klicka på byggnaderna för att låsa upp kunskapen inför provet.
+            Välkommen! Klicka på ämnena för att testa dina kunskaper och samla stödord.
         </p>
 
         <!-- Nivåväljare (Klickbara kort) -->
         <div id="level-selection" class="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
-            <!-- Nivå 1: Polisstationen -->
+            <!-- Nivå 1: Förundersökning och Åklagaren -->
             <div id="level-1" data-level="1" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 unlocked relative">
                 <span class="text-3xl mb-2">🚨</span>
-                <p class="font-bold text-lg">1. Polisstationen</p>
-                <p class="text-xs text-gray-400">Förundersökning & Åklagaren</p>
+                <p class="font-bold text-lg">Förundersökning & Åklagaren</p>
                 <span id="level-progress-1" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
-            <!-- Nivå 2: Tingshuset -->
+            <!-- Nivå 2: Rättegångsrollerna -->
             <div id="level-2" data-level="2" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked relative">
                 <span class="text-3xl mb-2">🏛️</span>
-                <p class="font-bold text-lg">2. Tingshuset</p>
-                <p class="text-xs text-gray-400">Rättegångsrollerna</p>
+                <p class="font-bold text-lg">Rättegångsrollerna</p>
                 <span id="level-progress-2" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
-            <!-- Nivå 3: Fängelset -->
+            <!-- Nivå 3: Påföljderna -->
             <div id="level-3" data-level="3" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked relative">
                 <span class="text-3xl mb-2">🔒</span>
-                <p class="font-bold text-lg">3. Kriminalvården</p>
-                <p class="text-xs text-gray-400">Påföljderna</p>
+                <p class="font-bold text-lg">Påföljderna</p>
                 <span id="level-progress-3" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
-            <!-- Nivå 4: Högsta Tornet -->
+            <!-- Nivå 4: Rättssäkerhet -->
             <div id="level-4" data-level="4" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked relative">
                 <span class="text-3xl mb-2">⚖️</span>
-                <p class="font-bold text-lg">4. Högsta Tornet</p>
-                <p class="text-xs text-gray-400">Rättssäkerhet</p>
+                <p class="font-bold text-lg">Rättssäkerhet</p>
                 <span id="level-progress-4" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
         </div>
 
-        <!-- Progressfält (Uppdaterad för att visa procent bredvid) -->
+        <!-- Progressfält -->
         <div class="mt-8">
             <div class="flex justify-between items-center mb-2">
                 <h2 class="text-xl font-bold text-white">Din Progres:</h2>
-                <p id="progress-percent" class="text-xl font-bold text-purple-400">0%</p> <!-- Nytt element för procent -->
+                <p id="progress-percent" class="text-xl font-bold text-purple-400">0%</p>
             </div>
             <div class="w-full bg-gray-600 rounded-full h-4">
                 <div id="progress-bar" class="bg-purple-500 h-4 rounded-full transition-all duration-500" style="width: 0%"></div>
             </div>
             <p id="progress-text" class="text-sm text-gray-400 mt-1">0 av 4 nivåer klarade</p>
+            <div class="flex justify-center mt-6">
+                <button onclick="resetGame()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-lg transition duration-200">
+                    Börja om (Nollställ)
+                </button>
+            </div>
         </div>
     </div>
 
     <!-- Spelområde (döljs initialt) -->
     <div id="game-area" class="hidden space-y-4">
-        <button id="back-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
-            ← Tillbaka till Kartan
-        </button>
+        <div class="flex justify-between">
+            <button id="back-button" class="bg-gray-600 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                ← Tillbaka till Kartan
+            </button>
+            <button onclick="resetGame()" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded-lg transition duration-200">
+                Börja om
+            </button>
+        </div>
 
-        <!-- Frågerubrik och text (justerad för att fokusera på frågan) -->
+        <!-- Frågerubrik och text -->
         <div class="text-center pt-2">
-            <h2 id="level-title" class="text-xl font-bold text-gray-400 mb-2"></h2> <!-- Rubriken mindre -->
-            <p id="question-text" class="text-2xl md:text-3xl text-white font-extrabold"></p> <!-- Frågetexten större och fetare -->
+            <h2 id="level-title" class="text-xl font-bold text-gray-400 mb-2"></h2>
+            <p id="question-text" class="text-2xl md:text-3xl text-white font-extrabold"></p>
         </div>
 
         <!-- Quiz/Aktivitetskort -->
         <div id="quiz-container" class="bg-gray-700 p-6 rounded-xl shadow-2xl space-y-6">
             
-            <!-- Ändrat till grid-cols-2 för att tvinga fram 2x2 layout även på mobil -->
             <div id="options-container" class="grid grid-cols-2 gap-4"> 
                 <!-- Svarsalternativ genereras här -->
             </div>
@@ -178,68 +191,60 @@
 </div>
 
 <script>
-    // Globala variabler för spelets tillstånd
-    let gameState = {
-        currentLevel: 1,
-        levelProgress: 0,
-        unlockedLevels: [1],
-        stodord: [], // Samlade stödord
-        // NYTT: Spårar antalet korrekt svarade frågor per nivå
-        levelCompletion: {
-            1: 0, 
-            2: 0,
-            3: 0,
-            4: 0
-        },
-    };
+    // Funktion för att slumpa ordningen på en array (Fisher-Yates shuffle)
+    function shuffleArray(array) {
+        for (let i = array.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [array[i], array[j]] = [array[j], array[i]];
+        }
+        return array;
+    }
 
-    // Data för spelets nivåer, baserat på det angivna materialet
+    // --- Speldata: Frågor och svar grupperade efter de nya kategorierna ---
     const gameData = [
-        // Nivå 1: Polisstationen - Förundersökning & Åklagaren (3 frågor)
         {
             id: 1,
-            title: "1. Polisstationen: Förundersökningen",
+            title: "Förundersökning och Åklagaren",
             questions: [
                 {
-                    question: "Vilken av dessa är en central uppgift för **Polisen** i en förundersökning?",
+                    question: "Vilken är Polisens huvuduppgift i en **förundersökning**?",
                     options: [
                         { text: "Leda rättegången och döma den tilltalade.", isCorrect: false },
-                        { text: "Samla bevis, hålla förhör och använda tekniska metoder.", isCorrect: true, stodord: "🔍 förundersökning, 🧪 bevis, 🗣️ förhör, ⚠️ Kan läggas ner" },
+                        { text: "Samla bevis, hålla förhör och använda tekniska metoder.", isCorrect: true, stodord: "🔍 Förundersökning: Samla bevis/hålla förhör" },
                         { text: "Besluta om dagsböter baserat på inkomst.", isCorrect: false },
                         { text: "Pröva överklagade mål från tingsrätten.", isCorrect: false }
                     ]
                 },
                 {
-                    question: "Vilken roll har **Åklagaren** när bevisen är tillräckligt starka för rättegång?",
+                    question: "Vad innebär det när Åklagaren **väcker åtal**?",
                     options: [
-                        { text: "Begära förlikning med den tilltalade.", isCorrect: false },
-                        { text: "Avgöra om den tilltalade får fotboja.", isCorrect: false },
-                        { text: "Väcka åtal och skriva en skriftlig anklagelse.", isCorrect: true, stodord: "⛓️ Beslutar om anhållan, 🔐 begär häktning, 📄 väcker åtal" },
-                        { text: "Utse nämndemän till domstolen.", isCorrect: false }
+                        { text: "Att polisen påbörjar en förundersökning.", isCorrect: false },
+                        { text: "Att domaren bestämmer sig för att häkta personen.", isCorrect: false },
+                        { text: "Att bevisen bedömts räcka för rättegång och den misstänkte blir tilltalad.", isCorrect: true, stodord: "📄 Väcka åtal: Misstänkt blir tilltalad" },
+                        { text: "Att den tilltalade blir villkorligt frigiven.", isCorrect: false }
                     ]
                 },
                 {
-                    question: "När blir en **misstänkt** officiellt en **tilltalad**?",
+                    question: "Varför beslutar **domstolen** om häktning, istället för polisen eller åklagaren?",
                     options: [
-                        { text: "När polisen påbörjar en förundersökning.", isCorrect: false },
-                        { text: "När domaren bestämmer sig för att häkta personen.", isCorrect: false },
-                        { text: "När åklagaren väcker åtal.", isCorrect: true, stodord: "📄 När åklagaren väcker åtal, ✔️ utredning är klar" },
-                        { text: "Efter att personen avtjänat två tredjedelar av straffet.", isCorrect: false }
+                        { text: "För att det krävs en oberoende prövning av behovet av häktning.", isCorrect: true, stodord: "🔐 Häktning: Kräver oberoende prövning av domstol" },
+                        { text: "För att åklagaren ska slippa ta ansvar.", isCorrect: false },
+                        { text: "För att den häktade ska få träffa sin försvarsadvokat.", isCorrect: false },
+                        { text: "Det händer bara i mål som är prejudikat.", isCorrect: false }
                     ]
                 }
             ]
         },
-        // Nivå 2: Tingshuset - Rättegångsrollerna (4 frågor)
         {
             id: 2,
-            title: "2. Tingshuset: Rättegångshjältarna",
+            title: "Rättegångsrollerna",
             questions: [
                 {
-                    question: "Vilken domstol är **första instans** och prövar både brottmål och tvistemål?",
+                    question: "Vad kallas den **första instansen** som prövar brottmål och tvistemål?",
                     options: [
-                        { text: "Högsta domstolen.", isCorrect: false },
+                        { text: "Högsta domstolen (HD).", isCorrect: false },
                         { text: "Hovrätten.", isCorrect: false },
-                        { text: "Tingsrätten.", isCorrect: true, stodord: "⚖️ första instans, 🔁 överklagade mål, 📘 HD: hur lagar ska tolkas" },
+                        { text: "Tingsrätten.", isCorrect: true, stodord: "⚖️ Tingsrätten: Första instans (Brottmål och tvistemål)" },
                         { text: "Åklagarmyndigheten.", isCorrect: false }
                     ]
                 },
@@ -247,93 +252,91 @@
                     question: "Vad är **försvarsadvokatens** främsta uppgift i rättegången?",
                     options: [
                         { text: "Avgöra påföljden för den tilltalade.", isCorrect: false },
+                        { text: "Hjälpa den tilltalade och se till att hen får en rättvis behandling.", isCorrect: true, stodord: "🎯 Försvarsadvokat: Ser till rättvis behandling för tilltalad" },
                         { text: "Leda utredningen och samla bevis.", isCorrect: false },
-                        { text: "Hjälpa den tilltalade och se till att hen får en rättvis behandling.", isCorrect: true, stodord: "🎯 hjälper den tilltalade, ⚖️ ser till rättvis behandling" },
-                        { text: "Försöka få parterna i tvistemål att förlikas.", isCorrect: false }
+                        { text: "Få parterna i tvistemål att förlikas.", isCorrect: false }
                     ]
                 },
                 {
-                    question: "Vad kallas det när ett **vittne** ljuger i domstolen, och varför är det allvarligt?",
+                    question: "Vilken roll har **nämndemännen** i domstolen?",
                     options: [
-                        { text: "Oberoende prövning, det gör processen längre.", isCorrect: false },
-                        { text: "Förlikning, det påverkar bara tvistemål.", isCorrect: false },
-                        { text: "Mened, det är allvarligt eftersom det kan påverka domslutet.", isCorrect: true, stodord: "👁️ vittne måste tala sanning, ⚠️ mened är att ljuga" },
-                        { text: "Prövningstillstånd, det krävs i Högsta domstolen.", isCorrect: false }
+                        { text: "De är utbildade jurister som leder rättegången.", isCorrect: false },
+                        { text: "De är vanliga medborgare som utses av politiska partier och dömer tillsammans med domaren.", isCorrect: true, stodord: "👥 Nämndemän: Vanliga medborgare som dömer med domaren" },
+                        { text: "De samlar in nya bevis till Hovrätten.", isCorrect: false },
+                        { text: "De ansvarar för att vittnet talar sanning.", isCorrect: false }
                     ]
                 },
                 {
-                    question: "Vad är den huvudsakliga skillnaden mellan ett **brottmål** och ett **tvistemål**?",
+                    question: "Vad kallas det när ett **vittne ljuger** i domstolen?",
                     options: [
-                        { text: "Brottmål prövas i Hovrätten, tvistemål i Tingsrätten.", isCorrect: false },
-                        { text: "Brottmål handlar om brott (t.ex. stöld), tvistemål om oenighet (t.ex. avtal/pengar).", isCorrect: true, stodord: "🚔 brottmål gäller brott, 💬 tvistemål är oenighet" },
-                        { text: "I brottmål söker domaren förlikning, i tvistemål inte.", isCorrect: false },
-                        { text: "Brottmål har alltid nämndemän, tvistemål aldrig.", isCorrect: false }
+                        { text: "Förlikning.", isCorrect: false },
+                        { text: "Mened.", isCorrect: true, stodord: "⚠️ Mened: Allvarligt brott när vittne ljuger" },
+                        { text: "Prövningstillstånd.", isCorrect: false },
+                        { text: "Villkorlig frigivning.", isCorrect: false }
                     ]
                 }
             ]
         },
-        // Nivå 3: Kriminalvården - Påföljderna (4 frågor)
         {
             id: 3,
-            title: "3. Kriminalvården: Påföljdsanalys",
+            title: "Påföljderna",
             questions: [
                 {
-                    question: "Hur beräknas **dagsböter** för att göra straffet mer rättvist?",
+                    question: "Hur beräknas **dagsböter**?",
                     options: [
                         { text: "En fast summa oavsett inkomst.", isCorrect: false },
-                        { text: "Antal dagar multiplicerat med ett belopp som beror på inkomst.", isCorrect: true, stodord: "💰 böter är fast summa, 📅 dagsböter, 📊 dagsbelopp beror på inkomst" },
+                        { text: "Antal dagar multiplicerat med ett belopp som beror på inkomst.", isCorrect: true, stodord: "📊 Dagsböter: Belopp anpassas efter inkomst (rättvist)" },
                         { text: "Domaren slumpar fram en summa baserat på brottets allvar.", isCorrect: false },
-                        { text: "Det är det samma som villkorlig frigivning.", isCorrect: false }
+                        { text: "Det är samma sak som villkorlig frigivning.", isCorrect: false }
                     ]
                 },
                 {
-                    question: "Vad innebär det att bli **villkorligt frigiven** från ett fängelsestraff?",
+                    question: "Vad innebär **villkorlig frigivning** från ett fängelsestraff?",
                     options: [
-                        { text: "Att personen aldrig blir fri.", isCorrect: false },
-                        { text: "Att personen blir frigiven efter halva tiden.", isCorrect: false },
-                        { text: "Att personen kan bli fri efter två tredjedelar av strafftiden.", isCorrect: true, stodord: "🔐 Inlåst, ⏱️ villkorligt frigiven 2/3 av tid" },
-                        { text: "Att personen får fotboja för resten av livet.", isCorrect: false }
+                        { text: "Att personen blir frigiven efter två tredjedelar av strafftiden.", isCorrect: true, stodord: "⏱️ Villkorlig frigivning: Efter 2/3 av fängelsestraffet" },
+                        { text: "Att personen får fotboja för resten av livet.", isCorrect: false },
+                        { text: "Att personen kan bli fri efter halva tiden.", isCorrect: false },
+                        { text: "Att personen aldrig blir fri.", isCorrect: false }
                     ]
                 },
                 {
-                    question: "Vilken typ av anstalt har **hård bevakning** och anpassas efter allvarligare brott?",
+                    question: "Vad är en nackdel med **fängelse** som påföljd?",
+                    options: [
+                        { text: "Det skyddar inte samhället tillräckligt.", isCorrect: false },
+                        { text: "Det kan göra återanpassning i samhället svårare.", isCorrect: true, stodord: "👎 Fängelse: Svårt med återanpassning, men skyddar samhället" },
+                        { text: "Det är inte anpassat efter inkomst.", isCorrect: false },
+                        { text: "Det ges endast vid tvistemål.", isCorrect: false }
+                    ]
+                },
+                {
+                    question: "Vilken typ av anstalt har **hård bevakning** och begränsad rörelsefrihet?",
                     options: [
                         { text: "Öppen anstalt.", isCorrect: false },
-                        { text: "Sluten anstalt.", isCorrect: true, stodord: "🚪 öppna anstalter, 🔒 slutna anstalter har hård bevakning" },
-                        { text: "Anstalten för tvistemål.", isCorrect: false },
-                        { text: "Kriminalvårdens centrum för förlikning.", isCorrect: false }
-                    ]
-                },
-                {
-                    question: "Vilken påföljd **skyddar samhället** mest, men kan göra återanpassning svårare?",
-                    options: [
-                        { text: "Böter.", isCorrect: false },
-                        { text: "Fotboja.", isCorrect: false },
-                        { text: "Fängelse.", isCorrect: true, stodord: "🔐 fängelse skyddar samhället, 📡 fotboja ger mer frihet" },
-                        { text: "Samhällstjänst.", isCorrect: false }
+                        { text: "Sluten anstalt.", isCorrect: true, stodord: "🔒 Sluten anstalt: Hård bevakning (för allvarligare brott)" },
+                        { text: "Kriminalvårdens centrum för förlikning.", isCorrect: false },
+                        { text: "Frivården.", isCorrect: false }
                     ]
                 }
             ]
         },
-        // Nivå 4: Högsta Tornet - Rättssäkerhet (3 frågor)
         {
             id: 4,
-            title: "4. Högsta Tornet: Rättssäkerheten",
+            title: "Rättssäkerhet",
             questions: [
                 {
                     question: "Varför tar **Högsta domstolen** (HD) bara upp mål som fått prövningstillstånd?",
                     options: [
-                        { text: "För att de måste spara tid.", isCorrect: false },
-                        { text: "För att de bara prövar mål som är viktiga för hur lagar ska tolkas i framtiden (vägledande).", isCorrect: true, stodord: "🎫 Prövningstillstånd, 🧭 Vägledande för hur lagar ska tolkas" },
-                        { text: "Eftersom det krävs nya bevis i HD.", isCorrect: false },
-                        { text: "Det är en del av principen 'Lika inför lagen'.", isCorrect: false }
+                        { text: "För att de måste spara tid och bara pröva nya bevis.", isCorrect: false },
+                        { text: "För att de bara prövar mål som är viktiga för hur lagar ska tolkas i framtiden (prejudikat).", isCorrect: true, stodord: "🎫 HD: Ger prövningstillstånd för vägledande fall (prejudikat)" },
+                        { text: "Det är en del av principen 'Offentlighetsprincipen'.", isCorrect: false },
+                        { text: "Eftersom de är första instans.", isCorrect: false }
                     ]
                 },
                 {
                     question: "Vad innebär principen **'Lika inför lagen'**?",
                     options: [
                         { text: "Alla ska dömas till samma straff för samma brott.", isCorrect: false },
-                        { text: "Ingen ska få fördelar eller nackdelar beroende på ekonomi eller bakgrund.", isCorrect: true, stodord: "⚖️ alla behandlas lika, 🚫 inga fördelar eller nackdelar" },
+                        { text: "Ingen ska få fördelar eller nackdelar beroende på ekonomi, bakgrund eller grupptillhörighet.", isCorrect: true, stodord: "⚖️ Lika inför lagen: Ingen diskriminering baserat på bakgrund" },
                         { text: "Endast jurister får döma i domstol.", isCorrect: false },
                         { text: "Man får överklaga hur många gånger man vill.", isCorrect: false }
                     ]
@@ -342,16 +345,39 @@
                     question: "Hur bidrar **oberoende domstolar** och **offentliga rättegångar** till rättssäkerheten?",
                     options: [
                         { text: "Det skapar misstro i samhället.", isCorrect: false },
+                        { text: "Det minskar risken för maktmissbruk och låter allmänheten granska domstolens arbete.", isCorrect: true, stodord: "🔍 Rättssäkerhet: Öppna rättegångar minskar risk för maktmissbruk" },
                         { text: "Det ger domaren möjlighet att välja sina egna lagar.", isCorrect: false },
-                        { text: "Det minskar risken för maktmissbruk och låter allmänheten granska domstolens arbete.", isCorrect: true, stodord: "✔️ rättssäkerheten ökar, 🏛️ domstolarna är oberoende, 🔍 öppna rättegångar" },
-                        { text: "Det gör att nämndemännen utses av kungen.", isCorrect: false }
+                        { text: "Det gör att nämndemännen kan utses av kungen.", isCorrect: false }
+                    ]
+                },
+                {
+                    question: "Varför är det viktigt att kunna **överklaga** en dom?",
+                    options: [
+                        { text: "För att det krävs nya bevis för att en dom ska ändras.", isCorrect: false },
+                        { text: "För att en högre domstol kan granska domen och korrigera eventuella fel.", isCorrect: true, stodord: "🔁 Överklaga: Högre domstol granskar/korrigerar fel (rättssäkerhet)" },
+                        { text: "Eftersom det bara är i Hovrätten som nämndemän deltar.", isCorrect: false },
+                        { text: "Det gäller endast i tvistemål.", isCorrect: false }
                     ]
                 }
             ]
         }
     ];
+    // --- Slut på speldata ---
 
-    // --- DOM-element ---
+    // --- Globalt speltillstånd och element ---
+    let gameState = {
+        currentLevel: 1,
+        levelProgress: 0,
+        unlockedLevels: [1], // Nivå 1 är alltid olåst
+        stodord: [], // Samlade stödord över alla nivåer
+        levelCompletion: {
+            1: 0, 
+            2: 0,
+            3: 0,
+            4: 0
+        },
+    };
+
     const app = document.getElementById('app');
     const mainScreen = document.getElementById('main-screen');
     const gameArea = document.getElementById('game-area');
@@ -365,210 +391,200 @@
     const nextQuestionButton = document.getElementById('next-question-button');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
-    const progressPercent = document.getElementById('progress-percent'); // Nytt element för total procent
+    const progressPercent = document.getElementById('progress-percent');
     const currentStodordDisplay = document.getElementById('current-stodord');
     const finalStodordDisplay = document.getElementById('final-stodord');
 
     let currentQuestionIndex = 0;
     let currentLevelData = null;
-    let levelStodord = []; // Stödord som samlas under nuvarande nivå
+    let levelStodord = [];
+    let currentQuestionAnswered = false;
+    // --- Slut på globalt speltillstånd och element ---
 
-    // --- Funktioner för spellogik ---
+    // --- Funktioner för spelmekanik ---
 
-    /**
-     * Uppdaterar UI för nivåvalet (låser/låser upp) och nivåklareringsprocent.
-     */
     function updateLevelSelection() {
         const totalLevels = gameData.length;
         let clearedLevels = 0;
         
-        // Gå igenom alla nivåkort
         levelSelection.querySelectorAll('.card').forEach(card => {
             const levelId = parseInt(card.dataset.level);
-            const totalQuestions = gameData.find(d => d.id === levelId).questions.length;
+            const levelData = gameData.find(d => d.id === levelId);
+            const totalQuestions = levelData.questions.length;
             const completedQuestions = gameState.levelCompletion[levelId] || 0;
             const levelPercentage = Math.round((completedQuestions / totalQuestions) * 100);
 
-            // Hitta och uppdatera PROCENTDISPLAYEN på kortet
             const progressDisplay = card.querySelector(`#level-progress-${levelId}`);
             if (progressDisplay) {
                 progressDisplay.textContent = `${levelPercentage}%`;
-                // Färga procenten grönt om 100%
-                if (levelPercentage === 100) {
-                    progressDisplay.classList.remove('bg-purple-600');
-                    progressDisplay.classList.add('bg-green-600');
-                } else {
-                    progressDisplay.classList.remove('bg-green-600');
-                    progressDisplay.classList.add('bg-purple-600');
-                }
             }
+
+            card.classList.remove('unlocked', 'locked', 'cleared-level');
+            card.style.borderColor = ''; // Återställ kantfärg
             
-            // Hantera låsta/olåsta kort och räkna klara nivåer
+            // Återställ klickhanteraren
+            card.onclick = () => {};
+
             if (levelPercentage === 100) {
                 clearedLevels++;
-            }
-
-            if (gameState.unlockedLevels.includes(levelId)) {
-                card.classList.remove('locked');
-                
-                // Om nivån är 100% klar, färga kanten grön och ta bort pulse-animationen
-                if (levelPercentage === 100) {
-                    card.classList.remove('unlocked');
-                    card.style.borderColor = '#10b981'; // Grön färg för klarad nivå
-                    card.onclick = () => showMessage('Denna nivå är redan klar. Prova en annan!', 'text-yellow-400');
-                } else {
-                    // Om nivån är olåst men inte klar, lägg till pulse-animation och klickhändelse
-                    card.classList.add('unlocked');
-                    card.style.borderColor = ''; // Återställ standardfärg för olåst
-                    card.onclick = () => startLevel(levelId);
-                }
-
+                card.classList.add('cleared-level');
+                progressDisplay.classList.remove('bg-purple-600');
+                progressDisplay.classList.add('bg-green-600');
+                // Gör en klarad nivå klickbar för repetition
+                card.onclick = () => startLevel(levelId); 
+            } else if (gameState.unlockedLevels.includes(levelId)) {
+                // Nivå är olåst men ej klar
+                card.classList.add('unlocked');
+                progressDisplay.classList.remove('bg-green-600');
+                progressDisplay.classList.add('bg-purple-600');
+                card.onclick = () => startLevel(levelId);
             } else {
-                // Låst nivå
+                // Nivå är låst
                 card.classList.add('locked');
-                card.classList.remove('unlocked');
-                card.style.borderColor = ''; // Återställ standardfärg
-                card.onclick = () => showMessage('Du måste klara föregående nivå först!', 'text-red-400');
+                progressDisplay.classList.remove('bg-green-600');
+                progressDisplay.classList.add('bg-purple-600');
+                // Eftersom pointer-events: none används i CSS behöver vi inte sätta onclick för låsta kort
             }
         });
 
-        // Uppdatera den ÖVERGRIPANDE progress-baren
-        const percentage = (clearedLevels / totalLevels) * 100;
-        
-        progressBar.style.width = `${percentage}%`;
-        progressPercent.textContent = `${Math.round(percentage)}%`; // Uppdaterat procentvisning
-        progressText.textContent = `${clearedLevels} av ${totalLevels} nivåer klarade`; // Uppdaterad text
+        const totalQuestionsAllLevels = gameData.reduce((sum, level) => sum + level.questions.length, 0);
+        const completedQuestionsTotal = Object.values(gameState.levelCompletion).reduce((sum, count) => sum + count, 0);
+
+        const totalPercentage = Math.round((completedQuestionsTotal / totalQuestionsAllLevels) * 100);
+
+        progressBar.style.width = `${totalPercentage}%`;
+        progressPercent.textContent = `${totalPercentage}%`; 
+        progressText.textContent = `${clearedLevels} av ${totalLevels} nivåer klarade`;
 
 
-        // Kontrollera om spelet är slut
         if (clearedLevels === totalLevels) {
             showEndScreen();
         }
     }
 
-    /**
-     * Startar en specifik nivå baserat på ID.
-     * @param {number} levelId 
-     */
     function startLevel(levelId) {
         currentLevelData = gameData.find(d => d.id === levelId);
         gameState.currentLevel = levelId;
-        currentQuestionIndex = 0;
-        levelStodord = [];
+        
+        // Hitta den första frågan som inte är klarad
+        currentQuestionIndex = currentLevelData.questions.findIndex((q, index) => 
+            (gameState.levelCompletion[levelId] || 0) <= index
+        );
 
-        // Växla vy
+        // Om alla frågor redan är klara, starta om från början
+        if (currentQuestionIndex === -1) {
+            currentQuestionIndex = 0;
+        }
+
+        // Återställ stödorden till de som redan har samlats in
+        levelStodord = gameState.stodord.filter(s => 
+            currentLevelData.questions.some(q => 
+                q.options.find(o => o.isCorrect)?.stodord === s
+            )
+        );
+
         mainScreen.classList.add('hidden');
         gameArea.classList.remove('hidden');
 
-        // Förbättrat fokus: levelTitle är mindre, questionText är större
         levelTitle.textContent = currentLevelData.title;
         loadQuestion();
         updateLevelStodord();
     }
 
-    /**
-     * Laddar nästa fråga i nivån.
-     */
     function loadQuestion() {
-        // Kontrollera om nivån är klar
         if (currentQuestionIndex >= currentLevelData.questions.length) {
             levelComplete();
             return;
         }
+        
+        currentQuestionAnswered = false;
 
         const question = currentLevelData.questions[currentQuestionIndex];
-        // Tar bort den repetitiva rubriken från frågan, eftersom levelTitle redan visar den
-        questionText.textContent = `${question.question}`; 
+        questionText.textContent = `Fråga ${currentQuestionIndex + 1} av ${currentLevelData.questions.length}: ${question.question}`; 
         
-        // Återställ UI
         optionsContainer.innerHTML = '';
         feedbackMessage.textContent = '';
         nextQuestionButton.classList.add('hidden');
 
-        // Ladda svarsalternativ
-        question.options.forEach((option, index) => {
+        // SLUMP MEKANISM: Slumpa ordningen på svarsalternativen
+        const shuffledOptions = shuffleArray([...question.options]);
+
+        shuffledOptions.forEach((option, index) => {
             const button = document.createElement('button');
             button.textContent = option.text;
-            // UPPDATERAT: Använder flex-grow för att tvinga knapparna att fylla hela det tillgängliga utrymmet
-            button.className = 'option-button card p-4 md:p-6 rounded-xl text-center text-lg md:text-xl font-bold text-gray-100 w-full transition duration-150 flex items-center justify-center min-h-[8rem]'; // Min-höjd tillagd för bättre utseende
+            // Lägg till min-h-[6rem] för bättre mobilanpassning
+            button.className = 'option-button card p-4 md:p-6 rounded-xl text-center text-lg md:text-xl font-bold text-gray-100 w-full transition duration-150 flex items-center justify-center min-h-[6rem]';
             button.onclick = () => checkAnswer(button, option, question.options);
             optionsContainer.appendChild(button);
         });
     }
 
-    /**
-     * Kontrollerar om svaret är korrekt.
-     * @param {HTMLElement} selectedButton - Knappen användaren klickade på.
-     * @param {object} selectedOption - Svarsalternativet.
-     * @param {Array<object>} allOptions - Alla alternativ för frågan.
-     */
     function checkAnswer(selectedButton, selectedOption, allOptions) {
-        // Förhindra fler klick på alternativ
-        optionsContainer.querySelectorAll('.option-button').forEach(btn => btn.disabled = true);
+        
+        if (currentQuestionAnswered) {
+             return;
+        }
+        currentQuestionAnswered = true; // Förhindra dubbelklick
 
         if (selectedOption.isCorrect) {
-            // Rätt svar
             selectedButton.classList.add('correct-answer');
-            feedbackMessage.textContent = 'Rätt! Bra jobbat.';
+            feedbackMessage.textContent = 'Rätt! Bra jobbat. Du har samlat ett stödord!';
             
-            // NYTT: Uppdatera nivåklareringsräknaren
+            // Inaktivera alla knappar
+            optionsContainer.querySelectorAll('.option-button').forEach(btn => btn.disabled = true);
+            
             const currentLevelId = gameState.currentLevel;
-            // Kontrollera att vi inte räknar samma fråga två gånger
-            // Eftersom vi går direkt till nästa fråga kan vi anta att detta är första gången.
-            gameState.levelCompletion[currentLevelId] = (gameState.levelCompletion[currentLevelId] || 0) + 1;
+            const currentLevelCompletedCount = gameState.levelCompletion[currentLevelId] || 0;
             
-            // Lås upp nästa nivå om nivån blir 100% klar
+            // Endast öka klarade frågor om det är första gången frågan besvaras korrekt
+            if (currentQuestionIndex === currentLevelCompletedCount) { 
+                gameState.levelCompletion[currentLevelId] = currentLevelCompletedCount + 1;
+            }
+            
             const totalQuestions = currentLevelData.questions.length;
+
+            // Logik för att låsa upp nästa nivå
             if (gameState.levelCompletion[currentLevelId] === totalQuestions) {
                 const nextLevelId = currentLevelId + 1;
                 if (nextLevelId <= gameData.length && !gameState.unlockedLevels.includes(nextLevelId)) {
                     gameState.unlockedLevels.push(nextLevelId);
+                    // Visa meddelande om att ny nivå är upplåst
+                    showMessage(`Nivå ${nextLevelId} upplåst: ${gameData.find(d => d.id === nextLevelId).title}`, 'text-purple-400');
                 }
             }
             
-            // Lägg till stödord och uppdatera displayen
-            if (selectedOption.stodord) {
+            if (selectedOption.stodord && !gameState.stodord.includes(selectedOption.stodord)) {
+                gameState.stodord.push(selectedOption.stodord);
                 levelStodord.push(selectedOption.stodord);
                 updateLevelStodord();
             }
             nextQuestionButton.classList.remove('hidden');
             nextQuestionButton.onclick = nextQuestion;
         } else {
-            // Fel svar
             selectedButton.classList.add('wrong-answer');
-            feedbackMessage.textContent = 'Fel svar. Försök igen!';
+            // För en fråga som inte är rätt får användaren försöka igen
+            currentQuestionAnswered = false; 
+            feedbackMessage.textContent = 'Fel svar. Prova igen!';
             
-            // Hitta och visa det korrekta svaret
-            const correctAnswer = allOptions.find(opt => opt.isCorrect);
-            optionsContainer.querySelectorAll('.option-button').forEach(btn => {
-                if (btn.textContent === correctAnswer.text) {
-                    btn.classList.add('correct-answer');
-                    // Visa korrekt svar men låt användaren klicka på Nästa
-                }
-            });
-            nextQuestionButton.classList.remove('hidden');
-            nextQuestionButton.onclick = nextQuestion; // Låt användaren gå vidare trots fel
+            // Markera det korrekta svaret i rött tills användaren klickar på det
+            // Sätt en kort timeout för animation, ta sedan bort fel färg men låt knappen vara aktiv
+            setTimeout(() => {
+                selectedButton.classList.remove('wrong-answer');
+            }, 300);
+            
+            nextQuestionButton.classList.add('hidden');
         }
     }
 
-    /**
-     * Går till nästa fråga i sekvensen.
-     */
     function nextQuestion() {
         currentQuestionIndex++;
         loadQuestion();
     }
 
-    /**
-     * Hanterar när en nivå är klar.
-     */
     function levelComplete() {
         showMessage(`Nivå ${gameState.currentLevel} klar!`, 'text-green-400');
         
-        // Lägg till de samlade stödorden till det globala tillståndet
-        gameState.stodord = gameState.stodord.concat(levelStodord);
-
-        // Återgå till huvudmenyn efter en kort fördröjning
+        // Hitta nästa olåsta nivå eller stanna på kartan
         setTimeout(() => {
             gameArea.classList.add('hidden');
             mainScreen.classList.remove('hidden');
@@ -576,24 +592,22 @@
         }, 1500);
     }
 
-    /**
-     * Uppdaterar visningen av stödorden för den aktuella nivån.
-     */
     function updateLevelStodord() {
-        if (levelStodord.length > 0) {
-            currentStodordDisplay.innerHTML = levelStodord.map(s => `<span class="inline-block bg-gray-600 rounded-full px-3 py-1 text-xs font-semibold text-purple-300 mr-2 mb-2">${s}</span>`).join('');
+        // Visa alla unika stödord som samlats in under denna nivån.
+        const currentLevelStodord = gameState.stodord.filter(s => 
+            currentLevelData.questions.some(q => 
+                q.options.find(o => o.isCorrect)?.stodord === s
+            )
+        );
+
+        if (currentLevelStodord.length > 0) {
+            currentStodordDisplay.innerHTML = currentLevelStodord.map(s => `<span class="inline-block bg-gray-600 rounded-full px-3 py-1 text-xs font-semibold text-purple-300 mr-2 mb-2">${s}</span>`).join('');
         } else {
             currentStodordDisplay.textContent = 'Inga stödord samlade än...';
         }
     }
 
-    /**
-     * Visar ett meddelande i feedback-fältet (används för låsta nivåer etc.).
-     * @param {string} msg 
-     * @param {string} colorClass 
-     */
     function showMessage(msg, colorClass) {
-        // Enkel meddelandebox, visas kortvarigt i huvudmenyn
         const notification = document.createElement('div');
         notification.textContent = msg;
         notification.className = `fixed top-4 left-1/2 transform -translate-x-1/2 ${colorClass} bg-gray-800 p-3 rounded-xl shadow-lg z-50 transition-opacity duration-300`;
@@ -601,26 +615,22 @@
         setTimeout(() => notification.remove(), 3000);
     }
 
-    /**
-     * Visar slutskärmen och sammanfattar alla stödord.
-     */
     function showEndScreen() {
         mainScreen.classList.add('hidden');
         gameArea.classList.add('hidden');
         endScreen.classList.remove('hidden');
 
-        // Ta bort dubbletter av stödord och formatera listan
         const uniqueStodord = [...new Set(gameState.stodord)];
 
-        finalStodordDisplay.innerHTML = uniqueStodord.map(s => {
-            // Gör stödorden lite snyggare i listan
-            return `<li class="p-2 border-b border-gray-600 last:border-b-0">${s}</li>`;
-        }).join('');
+        if (uniqueStodord.length === 0) {
+            finalStodordDisplay.innerHTML = '<p class="text-center italic text-red-400">Du måste svara på frågorna för att få en sammanfattning!</p>';
+        } else {
+            finalStodordDisplay.innerHTML = uniqueStodord.map(s => {
+                return `<li class="p-2 border-b border-gray-600 last:border-b-0">${s}</li>`;
+            }).join('');
+        }
     }
 
-    /**
-     * Återställer spelets tillstånd.
-     */
     function resetGame() {
         gameState = {
             currentLevel: 1,
@@ -630,18 +640,19 @@
             levelCompletion: { 1: 0, 2: 0, 3: 0, 4: 0 },
         };
         endScreen.classList.add('hidden');
+        gameArea.classList.add('hidden');
         mainScreen.classList.remove('hidden');
         updateLevelSelection();
+        showMessage('Spelet har startats om!', 'text-yellow-400');
     }
 
-    // --- Event Listeners ---
     backButton.addEventListener('click', () => {
         gameArea.classList.add('hidden');
         mainScreen.classList.remove('hidden');
-        updateLevelSelection(); // Uppdatera utseendet på huvudmenyn
+        updateLevelSelection();
     });
 
-    // Initialisera spelet när sidan laddas
+    // Ladda spelet vid sidans laddning
     window.onload = () => {
         updateLevelSelection();
     };
