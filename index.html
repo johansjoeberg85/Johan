@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8">
   <title>Lag & Rätt – Superquiz</title>
+
+  <!-- MOBILVY – superviktig för iPhone -->
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
   <style>
     * {
       box-sizing: border-box;
@@ -34,6 +38,7 @@
       align-items: center;
       gap: 12px;
       margin-bottom: 18px;
+      flex-wrap: wrap;
     }
 
     .title {
@@ -235,6 +240,40 @@
       border-radius: 14px;
       margin-top: 10px;
     }
+
+    /* 📱 MOBILANPASSNING FÖR iPHONE */
+    @media (max-width: 480px) {
+
+      body {
+        padding: 0;
+        align-items: flex-start;
+      }
+
+      .game-container {
+        width: 100vw;
+        min-height: 100vh;
+        border-radius: 0;
+        padding: 18px 12px 24px;
+        box-shadow: none;
+      }
+
+      .title {
+        font-size: 1.22rem;
+      }
+
+      .choices {
+        grid-template-columns: 1fr !important;
+      }
+
+      .btn {
+        font-size: 0.9rem;
+        padding: 8px 14px;
+      }
+
+      .feedback {
+        font-size: 0.9rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -245,6 +284,7 @@
       <span class="icon">⚖️</span>
       <span>Lag & Rätt – Superquiz</span>
     </div>
+
     <div class="stats">
       <div class="badge score" id="scoreBadge">⭐ Poäng: 0</div>
       <div class="badge level" id="levelBadge">🏆 Nivå: 1</div>
@@ -257,6 +297,7 @@
   </div>
 
   <div id="quizArea">
+
     <div class="card" id="questionCard">
       <div class="question-index" id="questionIndex">Fråga 1</div>
       <div class="question-text" id="questionText">Klicka på "Starta spelet"</div>
@@ -277,9 +318,9 @@
     <div class="bottom-restart">
       <button class="btn btn-secondary" id="restartButton">🔁 Börja om</button>
     </div>
-  </div>
 
-<script>
+  </div> <!-- /quizArea -->
+  <script>
   let answerLog = [];
 
   const cards = [
@@ -779,7 +820,9 @@
   });
 
   resetGameState();
-</script>
+  </script>
 </div>
 </body>
 </html>
+
+
