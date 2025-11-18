@@ -87,28 +87,32 @@
         <!-- Nivåväljare (Klickbara kort) -->
         <div id="level-selection" class="grid grid-cols-2 gap-4 md:grid-cols-4 md:gap-6">
             <!-- Nivå 1: Polisstationen -->
-            <div id="level-1" data-level="1" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 unlocked">
+            <div id="level-1" data-level="1" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 unlocked relative">
                 <span class="text-3xl mb-2">🚨</span>
                 <p class="font-bold text-lg">1. Polisstationen</p>
                 <p class="text-xs text-gray-400">Förundersökning & Åklagaren</p>
+                <span id="level-progress-1" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
             <!-- Nivå 2: Tingshuset -->
-            <div id="level-2" data-level="2" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked">
+            <div id="level-2" data-level="2" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked relative">
                 <span class="text-3xl mb-2">🏛️</span>
                 <p class="font-bold text-lg">2. Tingshuset</p>
                 <p class="text-xs text-gray-400">Rättegångsrollerna</p>
+                <span id="level-progress-2" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
             <!-- Nivå 3: Fängelset -->
-            <div id="level-3" data-level="3" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked">
+            <div id="level-3" data-level="3" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked relative">
                 <span class="text-3xl mb-2">🔒</span>
                 <p class="font-bold text-lg">3. Kriminalvården</p>
                 <p class="text-xs text-gray-400">Påföljderna</p>
+                <span id="level-progress-3" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
             <!-- Nivå 4: Högsta Tornet -->
-            <div id="level-4" data-level="4" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked">
+            <div id="level-4" data-level="4" class="card p-4 rounded-xl text-center flex flex-col items-center justify-center h-40 locked relative">
                 <span class="text-3xl mb-2">⚖️</span>
                 <p class="font-bold text-lg">4. Högsta Tornet</p>
                 <p class="text-xs text-gray-400">Rättssäkerhet</p>
+                <span id="level-progress-4" class="level-progress-display absolute top-2 right-2 text-sm font-bold bg-purple-600 text-white px-2 py-0.5 rounded-full">0%</span>
             </div>
         </div>
 
@@ -180,6 +184,13 @@
         levelProgress: 0,
         unlockedLevels: [1],
         stodord: [], // Samlade stödord
+        // NYTT: Spårar antalet korrekt svarade frågor per nivå
+        levelCompletion: {
+            1: 0, 
+            2: 0,
+            3: 0,
+            4: 0
+        },
     };
 
     // Data för spelets nivåer, baserat på det angivna materialet
@@ -354,7 +365,7 @@
     const nextQuestionButton = document.getElementById('next-question-button');
     const progressBar = document.getElementById('progress-bar');
     const progressText = document.getElementById('progress-text');
-    const progressPercent = document.getElementById('progress-percent'); // Nytt element
+    const progressPercent = document.getElementById('progress-percent'); // Nytt element för total procent
     const currentStodordDisplay = document.getElementById('current-stodord');
     const finalStodordDisplay = document.getElementById('final-stodord');
 
@@ -365,70 +376,69 @@
     // --- Funktioner för spellogik ---
 
     /**
-     * Uppdaterar UI för nivåvalet (låser/låser upp)
+     * Uppdaterar UI för nivåvalet (låser/låser upp) och nivåklareringsprocent.
      */
     function updateLevelSelection() {
-        // Räkna ut progressionen
         const totalLevels = gameData.length;
-        // Vi räknar en nivå som "klarad" om nästa nivå är olåst, eller om sista nivån är olåst.
-        // clearedLevels är antalet KLARADE nivåer.
         let clearedLevels = 0;
-        for (let i = 1; i <= totalLevels; i++) {
-            // Om nästa nivå (i + 1) är olåst, betyder det att nivå (i) är klar.
-            // Sista nivån är klar om den är olåst.
-            if (i < totalLevels && gameState.unlockedLevels.includes(i + 1)) {
-                clearedLevels++;
-            } else if (i === totalLevels && gameState.unlockedLevels.length === totalLevels) {
-                // Sista nivån (Nivå 4) är klar om alla är olåsta
-                clearedLevels = totalLevels;
-            } else if (i <= totalLevels && i < gameState.currentLevel) {
-                 // Om man har klickat Tillbaka till kartan innan en nivå är klar.
-                 // Detta är ett litet fusk eftersom vi bara låser upp nästa nivå vid levelComplete().
+        
+        // Gå igenom alla nivåkort
+        levelSelection.querySelectorAll('.card').forEach(card => {
+            const levelId = parseInt(card.dataset.level);
+            const totalQuestions = gameData.find(d => d.id === levelId).questions.length;
+            const completedQuestions = gameState.levelCompletion[levelId] || 0;
+            const levelPercentage = Math.round((completedQuestions / totalQuestions) * 100);
+
+            // Hitta och uppdatera PROCENTDISPLAYEN på kortet
+            const progressDisplay = card.querySelector(`#level-progress-${levelId}`);
+            if (progressDisplay) {
+                progressDisplay.textContent = `${levelPercentage}%`;
+                // Färga procenten grönt om 100%
+                if (levelPercentage === 100) {
+                    progressDisplay.classList.remove('bg-purple-600');
+                    progressDisplay.classList.add('bg-green-600');
+                } else {
+                    progressDisplay.classList.remove('bg-green-600');
+                    progressDisplay.classList.add('bg-purple-600');
+                }
             }
-        }
+            
+            // Hantera låsta/olåsta kort och räkna klara nivåer
+            if (levelPercentage === 100) {
+                clearedLevels++;
+            }
 
-        // Fix för att säkerställa att clearedLevels inte går över totalLevels (om spelaren är på Nivå 4)
-        if (gameState.unlockedLevels.length > clearedLevels) {
-            clearedLevels = gameState.unlockedLevels.length - 1;
-            if (clearedLevels > totalLevels) clearedLevels = totalLevels;
-        }
+            if (gameState.unlockedLevels.includes(levelId)) {
+                card.classList.remove('locked');
+                
+                // Om nivån är 100% klar, färga kanten grön och ta bort pulse-animationen
+                if (levelPercentage === 100) {
+                    card.classList.remove('unlocked');
+                    card.style.borderColor = '#10b981'; // Grön färg för klarad nivå
+                    card.onclick = () => showMessage('Denna nivå är redan klar. Prova en annan!', 'text-yellow-400');
+                } else {
+                    // Om nivån är olåst men inte klar, lägg till pulse-animation och klickhändelse
+                    card.classList.add('unlocked');
+                    card.style.borderColor = ''; // Återställ standardfärg för olåst
+                    card.onclick = () => startLevel(levelId);
+                }
 
+            } else {
+                // Låst nivå
+                card.classList.add('locked');
+                card.classList.remove('unlocked');
+                card.style.borderColor = ''; // Återställ standardfärg
+                card.onclick = () => showMessage('Du måste klara föregående nivå först!', 'text-red-400');
+            }
+        });
 
+        // Uppdatera den ÖVERGRIPANDE progress-baren
         const percentage = (clearedLevels / totalLevels) * 100;
         
         progressBar.style.width = `${percentage}%`;
         progressPercent.textContent = `${Math.round(percentage)}%`; // Uppdaterat procentvisning
         progressText.textContent = `${clearedLevels} av ${totalLevels} nivåer klarade`; // Uppdaterad text
 
-        // Gå igenom alla nivåkort
-        levelSelection.querySelectorAll('.card').forEach(card => {
-            const levelId = parseInt(card.dataset.level);
-            
-            // Hantera låsta/olåsta kort
-            if (gameState.unlockedLevels.includes(levelId)) {
-                card.classList.remove('locked');
-                card.classList.add('unlocked');
-                card.onclick = () => startLevel(levelId);
-                
-                // Om nivån är klar (dvs. nästa nivå är olåst eller sista nivån är klar)
-                // En nivå är klar om nästa nivå är olåst. Eller om det är sista nivån och spelet är slut.
-                const isCleared = gameState.unlockedLevels.includes(levelId + 1) || (levelId === totalLevels && clearedLevels === totalLevels);
-
-                if (isCleared) {
-                    card.classList.remove('unlocked');
-                    card.style.borderColor = '#10b981'; // Grön färg för klarad nivå
-                    card.onclick = () => showMessage('Denna nivå är redan klar. Prova en annan!', 'text-yellow-400');
-                } else {
-                     card.classList.remove('unlocked');
-                     card.classList.add('unlocked');
-                }
-
-            } else {
-                card.classList.add('locked');
-                card.classList.remove('unlocked');
-                card.onclick = () => showMessage('Du måste klara föregående nivå först!', 'text-red-400');
-            }
-        });
 
         // Kontrollera om spelet är slut
         if (clearedLevels === totalLevels) {
@@ -501,6 +511,21 @@
             selectedButton.classList.add('correct-answer');
             feedbackMessage.textContent = 'Rätt! Bra jobbat.';
             
+            // NYTT: Uppdatera nivåklareringsräknaren
+            const currentLevelId = gameState.currentLevel;
+            // Kontrollera att vi inte räknar samma fråga två gånger
+            // Eftersom vi går direkt till nästa fråga kan vi anta att detta är första gången.
+            gameState.levelCompletion[currentLevelId] = (gameState.levelCompletion[currentLevelId] || 0) + 1;
+            
+            // Lås upp nästa nivå om nivån blir 100% klar
+            const totalQuestions = currentLevelData.questions.length;
+            if (gameState.levelCompletion[currentLevelId] === totalQuestions) {
+                const nextLevelId = currentLevelId + 1;
+                if (nextLevelId <= gameData.length && !gameState.unlockedLevels.includes(nextLevelId)) {
+                    gameState.unlockedLevels.push(nextLevelId);
+                }
+            }
+            
             // Lägg till stödord och uppdatera displayen
             if (selectedOption.stodord) {
                 levelStodord.push(selectedOption.stodord);
@@ -542,13 +567,6 @@
         
         // Lägg till de samlade stödorden till det globala tillståndet
         gameState.stodord = gameState.stodord.concat(levelStodord);
-
-        // Lås upp nästa nivå
-        const nextLevelId = gameState.currentLevel + 1;
-        if (nextLevelId <= gameData.length && !gameState.unlockedLevels.includes(nextLevelId)) {
-            gameState.unlockedLevels.push(nextLevelId);
-            showMessage(`Du låste upp Nivå ${nextLevelId}!`, 'text-purple-400');
-        }
 
         // Återgå till huvudmenyn efter en kort fördröjning
         setTimeout(() => {
@@ -609,6 +627,7 @@
             levelProgress: 0,
             unlockedLevels: [1],
             stodord: [],
+            levelCompletion: { 1: 0, 2: 0, 3: 0, 4: 0 },
         };
         endScreen.classList.add('hidden');
         mainScreen.classList.remove('hidden');
